@@ -100,8 +100,8 @@ Total operations to invoke: 4045
 
 # Screenshots
 
-![invoking apis on commandline](screenshots/invoking apis on commandline.png)
+![invoking apis on commandline](screenshots/invoking%20apis%20on%20commandline.png)
 
 
 
-![data in browser](screenshots/data in browser.png)
+![data in browser](screenshots/data%20in%20browser.png)
