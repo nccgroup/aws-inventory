@@ -1,0 +1,3 @@
+*.dump
+gui/test/aws_inventory_data*.json
+*.pyc

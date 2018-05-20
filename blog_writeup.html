@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+<title>blog_writeup</title></head>
+<body><h1>AWS Inventory: A Tool for Mapping AWS Resources</h1>
+<h1>Overview</h1>
+<p>AWS Inventory is a tool that scans an AWS account looking for <a href='https://docs.aws.amazon.com/general/latest/gr/glos-chap.html#resource'>AWS resources</a>. There are constantly new services being added to AWS and existing ones are being expanded upon with new features. This ecosystem allows users to piece together many different services to form a customized cloud experience. Creating this customizability at scale comes with a manageability cost. It quickly becomes difficult to audit an AWS account for the different resources being used. Auditing is not only important for billing purposes, but also for security. Dormant and unknown resources are more prone to security configuration weaknesses because they tend to be out of sync with current security policy. Additionally, resources with unexpected dependencies pose availability, access control, and authorization issues.</p>
+<h1>Related Projects</h1>
+<p>There are existing tools that perform similar functionality. AWS provides one called <a href='https://aws.amazon.com/config/'>AWS Config</a>. It is &quot;a service that enables you to assess, audit, and evaluate the configurations of your AWS resources&quot;. However, it has limited service support and focuses on monitoring for changes in an account. Similarly, there are non-AWS tools that focus on account changes of predefined services like, <a href='https://github.com/Netflix/security_monkey'>Security Monkey</a> and <a href='https://github.com/Netflix/edda/'>Edda</a>. <a href='https://github.com/scopely-devops/skew'>Skew</a> is a tool that allows <a href=''>ARN</a>-based querying for resources in predefined services across an account.</p>
+<h1>How it Works</h1>
+<p>The tool has two components: a Python script to pull data from an AWS account and a single page webapp to view the data as a collapsible tree. Filtering can be done on AWS services, regions, and operations. A text search is also featured.</p>
+<p>AWS Inventory uses the low-level AWS SDK for Python called <a href='https://github.com/boto/botocore'>botocore</a> to locally discover <a href='https://botocore.readthedocs.io/en/latest/reference/index.html'>AWS services</a> and what <a href='https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html'>regions</a> they run in. Because of this dependency on a standard interface, the tool does NOT need updating from upstream changes to AWS services. The changes are pulled down with regular updates to botocore in the form of service model files. This is how each service is able to be abstracted away for use by all of the different <a href='https://aws.amazon.com/tools/#sdk'>AWS SDKs</a>.</p>
+<p>Once the services have been discovered, certain operations within each service are invoked and the responses recorded. Since operations follow a naming convention, those that look like they would enumerate resources are the ones chosen for invocation. The responses are stored in a deeply nested JSON object and dumped to a file.</p>
+<p>Finally, the JSON file is consumed by a local <a href='https://reactjs.org/'>React</a> <a href='https://en.wikipedia.org/wiki/Single-page_application'>single-page app</a> where the data can visualized and searched.</p>
+<h1>Installation</h1>
+<p>There is a small GUI for displaying progress which uses the standard Python <em>Tkinter</em> module. However, the underlying native library code for Tcl/Tk may need extra steps to install. Then,</p>
+<p><code>pip install -r requirements.txt</code></p>
+<h2>Windows</h2>
+<p>Use the Python installer to install Tkinter/Tcl/Tk.</p>
+<h2>Linux</h2>
+<p>Use your OS package manager:</p>
+<h3>Ubuntu / Debian</h3>
+<p><code>sudo apt-get install python-tk</code></p>
+<h1>Getting Started</h1>
+<p>You can run the Python script without any parameters. It will search for your AWS credentials in your shell environment, instance metadata, config file, then credentials file. You can also provide a CSV file containing your credentials on the commandline. You will want a user that has permissions like the AWS managed policy <a href='arn:aws:iam::aws:policy/job-function/ViewOnlyAccess'>ViewOnlyAccess</a>. If you are feeling lucky, you could just pipe the output of the tool to a JSON parser like <em>jq</em>.</p>
+<p>The tool could take a long time (dozens of minutes) to complete if no restrictions are placed on which operations to invoke for each service across each region. Filtering by service and region can be done on the commandline while filtering by service operation can be done via configuration file. A <a href='operation_blacklist.conf'>pre-configured file</a> was created and checked into the source code repository. It will be used by default. </p>
+<p>Aside from the commandline output, you can view the results locally in the webapp. No web server needed. Just open the <a href='gui/dist/index.html'>HTML file</a> in a browser and select the generated JSON file.</p>
+<p>The webapp uses <a href='https://www.jstree.com/'>jsTree</a> to display the data in a hierarchical, tree-like structure. There is also a search feature.</p>
+<h2>Examples</h2>
+<ul>
+<li>Run with defaults.</li>
+
+</ul>
+<p><code>$ python aws_inventory.py</code></p>
+<ul>
+<li>List AWS services known to <em>botocore</em>. This is all done locally by reading service model files.</li>
+
+</ul>
+<pre><code>$ python aws_inventory.py --list-svcs
+acm
+apigateway
+application-autoscaling
+appstream
+autoscaling
+batch
+budgets
+clouddirectory
+cloudformation
+cloudfront
+.
+.
+.
+</code></pre>
+<ul>
+<li>List service operations known to <em>botocore</em>. This is all done locally by reading service model files.</li>
+
+</ul>
+<pre><code>$ python aws_inventory.py --list-operations
+[shield]
+DescribeSubscription
+ListAttacks
+ListProtections
+
+[datapipeline]
+ListPipelines
+
+[firehose]
+ListDeliveryStreams
+.
+.
+.
+[glacier]
+# NONE
+
+[stepfunctions]
+ListActivities
+ListStateMachines
+
+Total operations to invoke: 4045
+</code></pre>
+<ul>
+<li>Print what operations would be invoked for a service. This is all done locally.</li>
+
+</ul>
+<p><code>$ python aws_inventory.py --debug --dry-run</code></p>
+<h1>Screenshots</h1>
+<p><img src='screenshots/invoking apis on commandline.png' alt='invoking apis on commandline' referrerPolicy='no-referrer' /></p>
+<p>&nbsp;</p>
+<p><img src='screenshots/data in browser.png' alt='data in browser' referrerPolicy='no-referrer' /></p>
+<h1>Roadmap</h1>
+<p>This tool aims to be a starting point for DevOps, auditors, IT, developers, and incident responders to successfully audit their AWS resources. This current phase of the tool gathers the raw account data and simply displays it as a collapsible tree. The following is a list of ideas for the next phase of AWS Inventory:</p>
+<ul>
+<li><p>Reduce time in data fetching by ignoring known low utility service operations</p>
+</li>
+<li><p>Improve search</p>
+<ul>
+<li>Query language that understands service semantics (e.g., search on &quot;ec2 instance with default security group&quot;) or JSON queries (e.g., <a href='http://jmespath.org/'>JMESPath</a>)</li>
+<li>Search from a select tree node</li>
+
+</ul>
+</li>
+<li><p>Move Python code to webapp</p>
+</li>
+<li><p>Compare resources between accounts</p>
+</li>
+<li><p>Provide a better user interface allowing the user to see more data at once and allowing them to intuitively sift through all of it.</p>
+</li>
+
+</ul>
+<h1>Open Source</h1>
+<p>You can find the source code hosted at <a href='https://github.com/nccgroup/aws-inventory' target='_blank' class='url'>https://github.com/nccgroup/aws-inventory</a>. If you are interested in learning more about the AWS ecosystem, checkout this <a href='https://github.com/donnemartin/awesome-aws'>Awesome List</a>.</p>
+</body>
+</html>
