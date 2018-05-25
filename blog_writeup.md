@@ -6,7 +6,7 @@ AWS Inventory is a tool that scans an AWS account looking for [AWS resources](ht
 
 # Related Projects
 
-There are existing tools that perform similar functionality. AWS provides one called [AWS Config](https://aws.amazon.com/config/). It is "a service that enables you to assess, audit, and evaluate the configurations of your AWS resources". However, it has limited service support and focuses on monitoring for changes in an account. Similarly, there are non-AWS tools that focus on account changes of predefined services like, [Security Monkey](https://github.com/Netflix/security_monkey) and [Edda](https://github.com/Netflix/edda/). [Skew](https://github.com/scopely-devops/skew) is a tool that allows [ARN]()-based querying for resources in predefined services across an account.
+There are existing tools that perform similar functionality. AWS provides one called [AWS Config](https://aws.amazon.com/config/). It is "a service that enables you to assess, audit, and evaluate the configurations of your AWS resources". However, it has limited service support and focuses on monitoring for changes in an account. Similarly, there are non-AWS tools that focus on account changes of predefined services like, [Security Monkey](https://github.com/Netflix/security_monkey) and [Edda](https://github.com/Netflix/edda/). [Skew](https://github.com/scopely-devops/skew) is a tool that allows [ARN](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html)-based querying for resources in predefined services across an account.
 
 # How it Works
 
@@ -38,11 +38,11 @@ Use your OS package manager:
 
 # Getting Started
 
-You can run the Python script without any parameters. It will search for your AWS credentials in your shell environment, instance metadata, config file, then credentials file. You can also provide a CSV file containing your credentials on the commandline. You will want a user that has permissions like the AWS managed policy [ViewOnlyAccess](arn:aws:iam::aws:policy/job-function/ViewOnlyAccess). If you are feeling lucky, you could just pipe the output of the tool to a JSON parser like *jq*.
+You can run the Python script without any parameters. It will search for your AWS credentials in your shell environment, instance metadata, config file, then credentials file. You can also provide a CSV file containing your credentials on the commandline. You will want a user that has permissions like the AWS managed policy *ViewOnlyAccess*. If you are feeling lucky, you could just pipe the output of the tool to a JSON parser like *jq*.
 
-The tool could take a long time (dozens of minutes) to complete if no restrictions are placed on which operations to invoke for each service across each region. Filtering by service and region can be done on the commandline while filtering by service operation can be done via configuration file. A [pre-configured file](operation_blacklist.conf) was created and checked into the source code repository. It will be used by default. 
+The tool could take a long time (dozens of minutes) to complete if no restrictions are placed on which operations to invoke for each service across each region. Filtering by service and region can be done on the commandline while filtering by service operation can be done via configuration file. A [pre-configured file](https://github.com/nccgroup/aws-inventory/blob/master/operation_blacklist.conf) was created and checked into the source code repository. It will be used by default. 
 
-Aside from the commandline output, you can view the results locally in the webapp. No web server needed. Just open the [HTML file](gui/dist/index.html) in a browser and select the generated JSON file.
+Aside from the commandline output, you can view the results locally in the webapp. No web server needed. Just open the [HTML file](https://github.com/nccgroup/aws-inventory/blob/master/gui/dist/index.html) in a browser and select the generated JSON file.
 
 The webapp uses [jsTree](https://www.jstree.com/) to display the data in a hierarchical, tree-like structure. There is also a search feature.
 
