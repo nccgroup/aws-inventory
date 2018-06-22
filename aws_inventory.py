@@ -76,15 +76,9 @@ def parse_args(args=None):
                             '(default: %(default)s)'
                         ))
 
-    parser.add_argument('--exceptions-dump',
-                        help='File to dump the exceptions store (default: {})'.format(
-                            aws_inventory.config.EXCEPTIONS_FILENAME_TEMPLATE.template
-                        ))
+    parser.add_argument('--exceptions-dump', help='File to dump the exceptions store')
 
-    parser.add_argument('--responses-dump',
-                        help='File to dump the responses store (default: {})'.format(
-                            aws_inventory.config.RESPONSES_FILENAME_TEMPLATE.template
-                        ))
+    parser.add_argument('--responses-dump', help='File to dump the responses store')
 
     parser.add_argument('--gui-data-file',
                         help='File to the GUI data (default: {})'.format(
@@ -108,14 +102,6 @@ def parse_args(args=None):
     # Fill in filename-based defaults. We can't use "default" kwarg because we need another
     #   commandline arg, namely the profile name.
 
-    if not parsed.exceptions_dump:
-        parsed.exceptions_dump = aws_inventory.config.EXCEPTIONS_FILENAME_TEMPLATE.substitute(
-            profile=parsed.profile
-        )
-    if not parsed.responses_dump:
-        parsed.responses_dump = aws_inventory.config.RESPONSES_FILENAME_TEMPLATE.substitute(
-            profile=parsed.profile
-        )
     if not parsed.gui_data_file:
         tool_dir = os.path.dirname(__file__)
         relative_path = aws_inventory.config.GUI_DATA_FILENAME_TEMPLATE.substitute(

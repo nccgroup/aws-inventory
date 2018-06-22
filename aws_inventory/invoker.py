@@ -111,13 +111,13 @@ class ApiInvoker(object):
         if not self.script_args.dry_run:
             if response_dump_fp:
                 self.store.dump_response_store(response_dump_fp)
-            else:
+            elif self.script_args.responses_dump:
                 with open(self.script_args.responses_dump, 'wb') as out_fp:
                     self.store.dump_response_store(out_fp)
 
             if exception_dump_fp:
                 self.store.dump_exception_store(exception_dump_fp)
-            else:
+            elif self.script_args.exceptions_dump:
                 with open(self.script_args.exceptions_dump, 'wb') as out_fp:
                     self.store.dump_exception_store(out_fp)
 
