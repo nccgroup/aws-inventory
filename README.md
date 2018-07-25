@@ -10,6 +10,8 @@ It uses [botocore](https://github.com/boto/botocore) to discover [AWS services](
 
 # Installation
 
+First, install Python2.7.
+
 There is a small GUI for displaying progress which uses the standard Python *Tkinter* module. However, the underlying native library code for Tcl/Tk may need extra steps to install. Then,
 
 `pip install -r requirements.txt`
