@@ -16,10 +16,6 @@ SVC_OPS_RE = re.compile(r'^(Describe|List).+')
 # used to create JSON file (in "./gui/") for holding the GUI data
 GUI_DATA_FILENAME_TEMPLATE = string.Template('gui/aws_inventory_data-$profile.json')
 
-# templates for writing to output files
-EXCEPTIONS_FILENAME_TEMPLATE = string.Template('exceptions-$profile.dump')
-RESPONSES_FILENAME_TEMPLATE = string.Template('responses-$profile.dump')
-
 ## Network-related timeouts. See botocore/endpoint.py ##
 # number of seconds to wait for a connection to succeed. By default, botocore tries 4 times.
 CLIENT_CONNECT_TIMEOUT = 10
