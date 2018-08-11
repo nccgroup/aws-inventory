@@ -18,5 +18,4 @@
 - [GUI] Context menu for copying text
 - [GUI] Can we eliminate Python script and use [AWS JavaScript SDK](https://aws.amazon.com/documentation/sdk-for-javascript/) instead?
   - Dynamically query/modify AWS account resources based on user input?
-
-
+- [CLI] Check for botocore updates
