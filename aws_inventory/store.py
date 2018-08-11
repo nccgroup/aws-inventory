@@ -122,7 +122,11 @@ class ResultStore(object):
                         children.append({'text': key, 'children': child})
                     else:
                         # leaf node
-                        children.append({'text': u'{} = {}'.format(key, val)})
+                        try:
+                            children.append({'text': u'{} = {}'.format(key, val)})
+                        except UnicodeDecodeError:
+                            # key or value is probably binary. For example, CloudTrail API ListPublicKeys
+                            children.append({'text': u'{} = {!r}'.format(key, val)})
             elif isinstance(obj, (list, tuple)):
                 for i, val in enumerate(obj):
                     child = build_children(val)
