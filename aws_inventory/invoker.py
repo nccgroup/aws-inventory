@@ -93,8 +93,7 @@ class ApiInvoker(object):
                     thread_work(
                         operations,
                         self.svc_worker,
-                        params,
-                        num_threads=config.MAX_THREADS)
+                        params)
                     self.progress_bar.update_progress(len(operations))
             self.progress_bar.finish_work()
             self.write_results()
@@ -143,6 +142,8 @@ class ApiInvoker(object):
         while True:
             try:
                 svc_op = que.get()
+                if svc_op is None:
+                    break
                 if storage.has_exceptions(svc_name, svc_op):
                     continue
 
@@ -171,21 +172,24 @@ class ApiInvoker(object):
                 que.task_done()
 
 #XXX: borrowed from opinel because their threading module is failing to load
-def thread_work(targets, function, params=None, num_threads=0):
+def thread_work(targets, function, params=None):
     """Thread worker creator.
 
     :param list targets: changing parameters
     :param function function: callback function
     :param dict params: static parameters
-    :param int num_threads: maximum number of threads
     """
     que = Queue(maxsize=0)
-    if not num_threads:
-        num_threads = len(targets)
-    for _ in range(num_threads):
+    for _ in range(config.MAX_THREADS):
         worker = Thread(target=function, args=(que, params))
         worker.setDaemon(True)
         worker.start()
     for target in targets:
         que.put(target)
+
+    # signal to threads so they know to stop
+    # see issue #2
+    for _ in range(config.MAX_THREADS):
+        que.put(None)
+
     que.join()
