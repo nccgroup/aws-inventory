@@ -171,7 +171,7 @@ class ApiInvoker(object):
             finally:
                 que.task_done()
 
-#XXX: borrowed from opinel because their threading module is failing to load
+#XXX: borrowed from opinel because their threading module is failing to load. Pretty much the example in the Queue docs
 def thread_work(targets, function, params=None):
     """Thread worker creator.
 
@@ -180,16 +180,20 @@ def thread_work(targets, function, params=None):
     :param dict params: static parameters
     """
     que = Queue(maxsize=0)
-    for _ in range(config.MAX_THREADS):
-        worker = Thread(target=function, args=(que, params))
-        worker.setDaemon(True)
-        worker.start()
-    for target in targets:
-        que.put(target)
+    thread_count = min(config.MAX_THREADS, len(targets))
+    if thread_count > 0:
+        for _ in range(thread_count):
+            worker = Thread(target=function, args=(que, params))
+            worker.setDaemon(True)
+            worker.start()
+        for target in targets:
+            que.put(target)
 
-    # signal to threads so they know to stop
-    # see issue #2
-    for _ in range(config.MAX_THREADS):
-        que.put(None)
+        # signal to threads so they know to stop
+        # see issue #2
+        for _ in range(thread_count):
+            que.put(None)
 
-    que.join()
+        que.join()
+    else:
+        LOGGER.warning('No work to be done.')
