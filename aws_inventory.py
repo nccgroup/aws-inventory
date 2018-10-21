@@ -116,12 +116,12 @@ def parse_args(args=None):
     
     parsed = parser.parse_args(args)
 
-    if type(parsed.gui_data_file_template) is str:
-        parsed.gui_data_file_template = string.Template(parsed.gui_data_file_template)
-    if type(parsed.response_data_file_template) is str:
-        parsed.response_data_file_template = string.Template(parsed.response_data_file_template)
-    if type(parsed.exception_data_file_template) is str:
-        parsed.exception_data_file_template = string.Template(parsed.exception_data_file_template)
+    if type(parsed.gui_file_template) is str:
+        parsed.gui_file_template = string.Template(parsed.gui_file_template)
+    if type(parsed.response_file_template) is str:
+        parsed.response_file_template = string.Template(parsed.response_file_template)
+    if type(parsed.exception_file_template) is str:
+        parsed.exception_file_template = string.Template(parsed.exception_file_template)
 
     # Fill in filename-based defaults. We can't use "default" kwarg because we need another
     #   commandline arg, namely the profile name.

@@ -80,7 +80,7 @@ class ResultStore(object):
         :return: serialized response store in JSON format
         """
         LOGGER.debug('Building the response store.')
-        return json.dumps({ 'profile' : profile, 'responses' : self._response_store }, cls=ResponseEncoder)
+        return json.dumps({ 'profile' : self.profile, 'responses' : self._response_store }, cls=ResponseEncoder)
 
     def dump_response_store(self, fp):
         """Pickle the response store.
