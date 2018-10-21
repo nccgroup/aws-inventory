@@ -2,13 +2,18 @@
 import argparse
 import logging
 import os.path
+import re
+import string
 
 import botocore
 from opinel.utils.console import configPrintException
+from opinel.utils.credentials import get_profiles_from_aws_credentials_file, aws_config_file 
 
 import aws_inventory.config
 import aws_inventory.blacklist
 import aws_inventory.invoker
+
+import tqdm
 
 
 # create a module logger and ignore messages outside of the module. botocore was spewing messages
@@ -80,10 +85,11 @@ def parse_args(args=None):
 
     parser.add_argument('--responses-dump', help='File to dump the responses store')
 
-    parser.add_argument('--gui-data-file',
-                        help='File to the GUI data (default: {})'.format(
+    parser.add_argument('--gui-data-file-template',
+                        help='Template for output GUI data files (default: {})'.format(
                             aws_inventory.config.GUI_DATA_FILENAME_TEMPLATE.template
-                        ))
+                        ),
+                        default=aws_inventory.config.GUI_DATA_FILENAME_TEMPLATE.template)
 
     parser.add_argument('--debug',
                         action='store_true',
@@ -97,19 +103,27 @@ def parse_args(args=None):
                         action='store_true',
                         help='Print version and exit')
 
+    parser.add_argument('--regex', default=False,
+                        action='store_true',
+                        help='treat --profile as a regular expression, execute for multiple profiles')
+    
     parsed = parser.parse_args(args)
+
+    if type(parsed.gui_data_file_template) is str:
+        parsed.gui_data_file_template = string.Template(parsed.gui_data_file_template)
 
     # Fill in filename-based defaults. We can't use "default" kwarg because we need another
     #   commandline arg, namely the profile name.
 
-    if not parsed.gui_data_file:
-        tool_dir = os.path.dirname(__file__)
-        relative_path = aws_inventory.config.GUI_DATA_FILENAME_TEMPLATE.substitute(
-            profile=parsed.profile
-        )
-        parsed.gui_data_file = os.path.join(tool_dir, relative_path)
     return parsed
 
+def gui_data_file_name(template,profile):
+    tool_dir = os.path.dirname(__file__)
+    relative_path = template.substitute(
+        profile=profile
+    )
+    return os.path.join(tool_dir, relative_path)
+ 
 def filter_services(api_model, services=frozenset(), excluded_services=frozenset()):
     """Build a list of services by merging together a white- and black-list.
 
@@ -119,7 +133,7 @@ def filter_services(api_model, services=frozenset(), excluded_services=frozenset
     :rtype: frozenset
     :return: the list of merged services
     """
-    available = frozenset(api_model.keys())
+    available = frozenset(list(api_model.keys()))
     if services:
         invalid = services - available
         if invalid:
@@ -243,13 +257,13 @@ def main(args):
     setup_logging(args.debug)
 
     if args.version:
-        print aws_inventory.__version__
+        print(aws_inventory.__version__)
         return
 
     api_model = build_api_model()
 
     if args.list_svcs:
-        print '\n'.join(sorted(filter_services(api_model)))
+        print('\n'.join(sorted(filter_services(api_model))))
         return
 
     # configure the debug level for opinel
@@ -257,7 +271,7 @@ def main(args):
 
     # validate services against API mode #
 
-    available_services = api_model.keys()
+    available_services = list(api_model.keys())
 
     if args.services:
         invalid_included_services = [svc for svc in args.services if svc not in available_services]
@@ -305,16 +319,27 @@ def main(args):
             len(service_descriptors[svc_name]['regions'])
         )
         if args.list_operations:
-            print '[{}]\n{}\n'.format(
+            print('[{}]\n{}\n'.format(
                 svc_name,
                 '\n'.join(service_descriptors[svc_name]['ops']) or '# NONE'
-            )
+            ))
+
+    profiles = [ args.profile ]
+    if args.regex:
+        # find unique profiles that match the regex
+        profiles = list(set(map(lambda profile : profile.split()[-1], get_profiles_from_aws_credentials_file())))
+        profiles = list(filter(lambda profile : re.search(args.profile,profile), profiles))
+
+    tqdm.tqdm.monitor_interval = 0
 
     if args.list_operations:
-        print 'Total operations to invoke: {}'.format(ops_count)
+        print('Total operations to invoke: {}'.format(ops_count * len(profiles)))
     else:
-        LOGGER.debug('Total operations to invoke: %d.', ops_count)
-        aws_inventory.invoker.ApiInvoker(args, service_descriptors, ops_count).start()
+        LOGGER.debug('Total operations to invoke: %d.', ops_count * len(profiles))
+        for profile in profiles:
+            args.profile=profile
+            gui_data_file = gui_data_file_name(args.gui_data_file_template, profile)
+            aws_inventory.invoker.ApiInvoker(args, service_descriptors, ops_count).probe_services()
 
 if __name__ == '__main__':
     main(parse_args())

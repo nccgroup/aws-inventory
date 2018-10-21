@@ -15,15 +15,15 @@ def parse_data(py_obj):
         elif len(path) == 4:
             # interested in API responses
             try:
-                size = len(obj) if not isinstance(obj, basestring) else 0
+                size = len(obj) if not isinstance(obj, str) else 0
                 if size > MAX_NUM_CHILDREN:
-                    print '.'.join(path)
+                    print('.'.join(path))
             except TypeError:
                 pass
             return
 
         if isinstance(obj, dict):
-            for key, val in obj.items():
+            for key, val in list(obj.items()):
                 parse_children(val, path + [str(key)])
         elif isinstance(obj, (list, tuple)):
             for val in obj:

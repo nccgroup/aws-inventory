@@ -8,6 +8,13 @@ It uses [botocore](https://github.com/boto/botocore) to discover [AWS services](
 * Exceptions raised during tool execution can be written to a file specified on the commandline. The file format is [Python pickle](https://docs.python.org/2/library/pickle.html).
 * gui/aws_inventory_data-&lt;environment_name&gt;.json - JSON format. Parsed responses structured for input to the GUI.
 
+# Fork
+
+This is a fork of NCC's aws-inventory tool. There are three differences;
+  1. *Inventory Multiple Profiles* - Supports a "--regex" option that causes the "--profile" parameter to be treated as a regular expression. All profiles that match the regex will be collected.
+  1. *Removed Tk* - Removed dependencies on Tk. Replaced the progress functionality with a simpler text progress bar. This also means there's no prompt to "start", which makes multiple-profiles more efficient.
+  1. *Python 3* - Converted to python 3.
+  
 # Installation
 
 First, install Python2.7.

@@ -9,4 +9,4 @@ class DateTimeEncoder(json.JSONEncoder):
             return o.isoformat()
         return super(DateTimeEncoder, self).default(o)
 
-print json.dumps(pickle.load(open(sys.argv[1], 'rb')), cls=DateTimeEncoder)
+print(json.dumps(pickle.load(open(sys.argv[1], 'rb')), cls=DateTimeEncoder))

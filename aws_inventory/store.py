@@ -11,8 +11,8 @@ import uuid
 
 import botocore
 
-import config
-import version
+from . import config
+from . import version
 
 
 LOGGER = logging.getLogger(__name__)
@@ -116,17 +116,17 @@ class ResultStore(object):
         def build_children(obj):
             children = []
             if isinstance(obj, dict):
-                for key, val in obj.items():
+                for key, val in list(obj.items()):
                     child = build_children(val)
                     if isinstance(child, (dict, list, tuple)) and child:
                         children.append({'text': key, 'children': child})
                     else:
                         # leaf node
                         try:
-                            children.append({'text': u'{} = {}'.format(key, val)})
+                            children.append({'text': '{} = {}'.format(key, val)})
                         except UnicodeDecodeError:
                             # key or value is probably binary. For example, CloudTrail API ListPublicKeys
-                            children.append({'text': u'{} = {!r}'.format(key, val)})
+                            children.append({'text': '{} = {!r}'.format(key, val)})
             elif isinstance(obj, (list, tuple)):
                 for i, val in enumerate(obj):
                     child = build_children(val)

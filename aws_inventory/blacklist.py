@@ -3,7 +3,7 @@ Ignore certain operations. There are a few reasons to ignore them. Some don't ac
 account resources. Others may be too verbose or not relevant for some users of this tool.
 """
 
-import ConfigParser
+import configparser
 import logging
 
 
@@ -19,7 +19,7 @@ class OpBlacklistParser(object):
     def __init__(self, blacklist_fp, api_model):
         self.blacklist_fp = blacklist_fp
         self.api_model = api_model
-        self._cfg_parser = ConfigParser.RawConfigParser(allow_no_value=True)
+        self._cfg_parser = configparser.RawConfigParser(allow_no_value=True)
         self._cfg_parser.optionxform = str  # case sensitive
         self._cfg_parser.readfp(self.blacklist_fp)
 
