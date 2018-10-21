@@ -33,6 +33,10 @@ def parse_args(args=None):
                         default='default',
                         help='Name of the profile (default: %(default)s)')
 
+    parser.add_argument('--regex', default=False,
+                        action='store_true',
+                        help='treat --profile as a regular expression, execute for multiple profiles')
+
     parser.add_argument('--mfa-serial',
                         help='serial number of MFA device')
 
@@ -67,6 +71,11 @@ def parse_args(args=None):
                         action='store_true',
                         help='Print a list of operations to invoke for a given service and exit')
 
+    parser.add_argument('--output',
+                        default=['gui'],
+                        nargs='+',
+                        help=('List of files to export. Default is "gui". Others include "response" (API JSON) and "exception"'))
+
     parser.add_argument('--dry-run',
                         action='store_true',
                         help=('Go through local API discovery, but do not actually invoke any API. '
@@ -81,14 +90,16 @@ def parse_args(args=None):
                             '(default: %(default)s)'
                         ))
 
-    parser.add_argument('--exceptions-dump', help='File to dump the exceptions store')
+    parser.add_argument('--exception-file-template', 
+                        help='Template filename to dump the exception data (default: {})'.format(aws_inventory.config.EXCEPTION_DATA_FILENAME_TEMPLATE.template),
+                        default=aws_inventory.config.EXCEPTION_DATA_FILENAME_TEMPLATE.template)
 
-    parser.add_argument('--responses-dump', help='File to dump the responses store')
+    parser.add_argument('--response-file-template', 
+                        help='Template filename to dump the responses store (default: {})'.format(aws_inventory.config.RESPONSE_DATA_FILENAME_TEMPLATE.template),
+                        default=aws_inventory.config.RESPONSE_DATA_FILENAME_TEMPLATE.template)
 
-    parser.add_argument('--gui-data-file-template',
-                        help='Template for output GUI data files (default: {})'.format(
-                            aws_inventory.config.GUI_DATA_FILENAME_TEMPLATE.template
-                        ),
+    parser.add_argument('--gui-file-template',
+                        help='Template for output GUI data files (default: {})'.format(aws_inventory.config.GUI_DATA_FILENAME_TEMPLATE.template),
                         default=aws_inventory.config.GUI_DATA_FILENAME_TEMPLATE.template)
 
     parser.add_argument('--debug',
@@ -102,27 +113,23 @@ def parse_args(args=None):
     parser.add_argument('-V', '--version',
                         action='store_true',
                         help='Print version and exit')
-
-    parser.add_argument('--regex', default=False,
-                        action='store_true',
-                        help='treat --profile as a regular expression, execute for multiple profiles')
     
     parsed = parser.parse_args(args)
 
     if type(parsed.gui_data_file_template) is str:
         parsed.gui_data_file_template = string.Template(parsed.gui_data_file_template)
+    if type(parsed.response_data_file_template) is str:
+        parsed.response_data_file_template = string.Template(parsed.response_data_file_template)
+    if type(parsed.exception_data_file_template) is str:
+        parsed.exception_data_file_template = string.Template(parsed.exception_data_file_template)
 
     # Fill in filename-based defaults. We can't use "default" kwarg because we need another
     #   commandline arg, namely the profile name.
 
     return parsed
 
-def gui_data_file_name(template,profile):
-    tool_dir = os.path.dirname(__file__)
-    relative_path = template.substitute(
-        profile=profile
-    )
-    return os.path.join(tool_dir, relative_path)
+def data_file_name(template,profile):
+    return template.substitute(profile=profile)
  
 def filter_services(api_model, services=frozenset(), excluded_services=frozenset()):
     """Build a list of services by merging together a white- and black-list.
@@ -338,8 +345,10 @@ def main(args):
         LOGGER.debug('Total operations to invoke: %d.', ops_count * len(profiles))
         for profile in profiles:
             args.profile=profile
-            gui_data_file = gui_data_file_name(args.gui_data_file_template, profile)
-            aws_inventory.invoker.ApiInvoker(args, service_descriptors, ops_count).probe_services()
+            gui_data_file       = data_file_name(args.gui_file_template, profile)       if 'gui' in args.output else None
+            response_data_file  = data_file_name(args.response_file_template, profile)  if 'response' in args.output else None
+            exception_data_file = data_file_name(args.exception_file_template, profile) if 'exception' in args.output else None
+            aws_inventory.invoker.ApiInvoker(args, service_descriptors, ops_count, gui_data_file, response_data_file, exception_data_file).probe_services()
 
 if __name__ == '__main__':
     main(parse_args())

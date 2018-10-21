@@ -3,6 +3,7 @@
 import multiprocessing
 import re
 import string
+import os
 
 
 # max number of threads for invoking APIs of a service in a region
@@ -14,7 +15,9 @@ SVC_OPS_RE = re.compile(r'^(Describe|List).+')
 ## some constants ##
 
 # used to create JSON file (in "./gui/") for holding the GUI data
-GUI_DATA_FILENAME_TEMPLATE = string.Template('gui/aws_inventory_data-$profile.json')
+GUI_DATA_FILENAME_TEMPLATE = string.Template(os.path.join(os.getcwd(),'gui','aws_inventory_data-$profile.json'))
+RESPONSE_DATA_FILENAME_TEMPLATE = string.Template(os.path.join(os.getcwd(),'data','aws_inventory_data-$profile.json'))
+EXCEPTION_DATA_FILENAME_TEMPLATE = string.Template(os.path.join(os.getcwd(),'exception','aws_inventory_data-$profile.json'))
 
 ## Network-related timeouts. See botocore/endpoint.py ##
 # number of seconds to wait for a connection to succeed. By default, botocore tries 4 times.

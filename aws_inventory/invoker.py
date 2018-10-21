@@ -18,12 +18,17 @@ LOGGER = logging.getLogger(__name__)
 class ApiInvoker(object):
     """Invoke APIs from GUI."""
 
-    def __init__(self, script_args, svc_descriptors, ops_count):
+    def __init__(self, script_args, svc_descriptors, ops_count, gui_data_file, response_data_file, exception_data_file):
         self.script_args = script_args
         self.svc_descriptors = svc_descriptors
         self.ops_count = ops_count
         self.progress = tqdm(total=ops_count)
-        self.store = store.ResultStore(script_args.profile)
+
+        self.gui_data_file = gui_data_file
+        self.response_data_file = response_data_file
+        self.exception_data_file = exception_data_file
+
+        self.store = store.ResultStore(self.script_args.profile)
 
         # search for AWS credentials
         # using opinel allows us to use MFA and a CSV file. Otherwise, we could just use
@@ -94,7 +99,7 @@ class ApiInvoker(object):
         except progress.LifetimeError as e:
             LOGGER.debug(e)
 
-    def write_results(self, response_dump_fp=None, exception_dump_fp=None, gui_data_fp=None):
+    def write_results(self):
         """Output the results, if not a dry run.
 
         :param file response_dump_fp: file for responses
@@ -102,25 +107,19 @@ class ApiInvoker(object):
         :param file gui_data_fp: file for GUI data
         """
         if not self.script_args.dry_run:
-            if response_dump_fp:
-                self.store.dump_response_store(response_dump_fp)
-            elif self.script_args.responses_dump:
-                with open(self.script_args.responses_dump, 'wb') as out_fp:
+            if self.response_data_file is not None:
+                with open(self.response_data_file, 'w') as out_fp:
                     self.store.dump_response_store(out_fp)
 
-            if exception_dump_fp:
-                self.store.dump_exception_store(exception_dump_fp)
-            elif self.script_args.exceptions_dump:
-                with open(self.script_args.exceptions_dump, 'wb') as out_fp:
+            if self.exception_data_file is not None:
+                with open(self.script_args.exception_data_file, 'wb') as out_fp:
                     self.store.dump_exception_store(out_fp)
 
             if self.script_args.verbose:
                 print(self.store.get_response_store())
 
-            if gui_data_fp:
-                self.store.generate_data_file(gui_data_fp)
-            else:
-                with open(self.script_args.gui_data_file, 'w') as out_fp:
+            if self.gui_data_file is not None:
+                with open(self.gui_data_file, 'w') as out_fp:
                     self.store.generate_data_file(out_fp)
 
     @staticmethod

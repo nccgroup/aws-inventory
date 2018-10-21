@@ -88,7 +88,8 @@ class ResultStore(object):
         :param file fp: file to write to
         """
         LOGGER.debug('Writing the response store to file "%s".', fp.name)
-        pickle.dump(self._response_store, fp)
+        fp.write(self.get_response_store())
+        #pickle.dump(self._response_store, fp)
 
     def dump_exception_store(self, fp):
         """Pickle the exception store.
