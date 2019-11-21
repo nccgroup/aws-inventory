@@ -1,7 +1,7 @@
 """Abstraction for invoking AWS APIs (a.k.a. operations) and handling responses."""
 
 import logging
-from Queue import Queue
+from multiprocessing import Queue
 from threading import Thread
 
 import botocore
