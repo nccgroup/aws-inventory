@@ -49,6 +49,7 @@ class ApiInvoker(object):
             # create a config for all clients to share
             client_config = botocore.config.Config(
                 connect_timeout=config.CLIENT_CONNECT_TIMEOUT,
+                max_pool_connections=25,
                 read_timeout=config.CLIENT_READ_TIMEOUT
             )
 
