@@ -1,4 +1,6 @@
 *.dump
 gui/test/aws_inventory_data*.json
+gui/aws_inventory_data*.json
 *.pyc
-/.idea/workspace.xml
+.idea/*
+venv*/

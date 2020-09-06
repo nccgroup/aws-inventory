@@ -11,11 +11,12 @@ import uuid
 
 import botocore
 
-import config
-import version
+import aws_inventory.config as config
+import aws_inventory.version as version
 
 
 LOGGER = logging.getLogger(__name__)
+
 
 class ResponseEncoder(json.JSONEncoder):
     """Encode responses from operations in order to serialize to JSON."""
@@ -24,6 +25,7 @@ class ResponseEncoder(json.JSONEncoder):
         if isinstance(o, datetime.datetime):
             return o.isoformat()
         return super(ResponseEncoder, self).default(o)
+
 
 class ResultStore(object):
     """Storage and serialization for responses and exceptions."""

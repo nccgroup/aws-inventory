@@ -11,12 +11,11 @@ MAX_THREADS = multiprocessing.cpu_count() * 2
 # RE to filter desired service operation names
 SVC_OPS_RE = re.compile(r'^(Describe|List).+')
 
-## some constants ##
-
+# ## some constants ##
 # used to create JSON file (in "./gui/") for holding the GUI data
 GUI_DATA_FILENAME_TEMPLATE = string.Template('gui/aws_inventory_data-$profile.json')
 
-## Network-related timeouts. See botocore/endpoint.py ##
+# ## Network-related timeouts. See botocore/endpoint.py ##
 # number of seconds to wait for a connection to succeed. By default, botocore tries 4 times.
 CLIENT_CONNECT_TIMEOUT = 10
 # number of seconds to wait for a complete API response to be received

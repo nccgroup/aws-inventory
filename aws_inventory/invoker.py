@@ -1,15 +1,18 @@
 """Abstraction for invoking AWS APIs (a.k.a. operations) and handling responses."""
 
 import logging
-from Queue import Queue
+from queue import Queue
 from threading import Thread
 
 import botocore
+import botocore.config
+import botocore.exceptions
+import botocore.session
 from opinel.utils.credentials import read_creds
 
-import config
-import progress
-import store
+import aws_inventory.config as config
+import aws_inventory.progress as progress
+import aws_inventory.store as store
 
 
 LOGGER = logging.getLogger(__name__)
@@ -121,7 +124,7 @@ class ApiInvoker(object):
                     self.store.dump_exception_store(out_fp)
 
             if self.script_args.verbose:
-                print self.store.get_response_store()
+                print(self.store.get_response_store())
 
             if gui_data_fp:
                 self.store.generate_data_file(gui_data_fp)
@@ -171,7 +174,8 @@ class ApiInvoker(object):
             finally:
                 que.task_done()
 
-#XXX: borrowed from opinel because their threading module is failing to load. Pretty much the example in the Queue docs
+
+# XXX: borrowed from opinel because their threading module is failing to load. Pretty much the example in the Queue docs
 def thread_work(targets, function, params=None):
     """Thread worker creator.
 

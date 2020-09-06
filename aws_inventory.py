@@ -4,6 +4,7 @@ import logging
 import os.path
 
 import botocore
+import botocore.session
 from opinel.utils.console import configPrintException
 
 import aws_inventory.config
@@ -16,8 +17,10 @@ logging.basicConfig()
 LOGGER = logging.getLogger(aws_inventory.__name__)
 LOGGER.addFilter(logging.Filter(aws_inventory.__name__))
 
+
 def setup_logging(verbose):
     LOGGER.setLevel(logging.DEBUG if verbose else logging.INFO)
+
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
@@ -64,8 +67,9 @@ def parse_args(args=None):
 
     parser.add_argument('--dry-run',
                         action='store_true',
-                        help=('Go through local API discovery, but do not actually invoke any API. '
-                              'Useful for checking filtering of regions, services, and operations.'
+                        help=(
+                            'Go through local API discovery, but do not actually invoke any API. '
+                            'Useful for checking filtering of regions, services, and operations.'
                         ))
 
     parser.add_argument('--op-blacklist',
@@ -110,6 +114,7 @@ def parse_args(args=None):
         parsed.gui_data_file = os.path.join(tool_dir, relative_path)
     return parsed
 
+
 def filter_services(api_model, services=frozenset(), excluded_services=frozenset()):
     """Build a list of services by merging together a white- and black-list.
 
@@ -136,6 +141,7 @@ def filter_services(api_model, services=frozenset(), excluded_services=frozenset
 
     return enabled
 
+
 def filter_operations(api_model, op_blacklist_parser, regions, services):
     """Build a list of operations.
 
@@ -160,9 +166,9 @@ def filter_operations(api_model, op_blacklist_parser, regions, services):
                     LOGGER.warning('[%s] No valid regions after applying service and region '
                                    'filters.', svc_name)
             else:
-                 target_regions = available_regions
+                target_regions = available_regions
         else:
-             target_regions = [None]
+            target_regions = [None]
         svc_descriptors[svc_name] = {'regions': target_regions}
 
         LOGGER.debug('[%s] Service region(s) to inspect: %s.',
@@ -188,6 +194,7 @@ def filter_operations(api_model, op_blacklist_parser, regions, services):
         svc_descriptors[svc_name]['ops'] = operations
 
     return svc_descriptors
+
 
 def build_api_model():
     """Build a model of the available API.
@@ -239,17 +246,18 @@ def build_api_model():
 
     return svc_descriptors
 
+
 def main(args):
     setup_logging(args.debug)
 
     if args.version:
-        print aws_inventory.__version__
+        print(aws_inventory.__version__)
         return
 
     api_model = build_api_model()
 
     if args.list_svcs:
-        print '\n'.join(sorted(filter_services(api_model)))
+        print('\n'.join(sorted(filter_services(api_model))))
         return
 
     # configure the debug level for opinel
@@ -305,16 +313,17 @@ def main(args):
             len(service_descriptors[svc_name]['regions'])
         )
         if args.list_operations:
-            print '[{}]\n{}\n'.format(
+            print('[{}]\n{}\n'.format(
                 svc_name,
                 '\n'.join(service_descriptors[svc_name]['ops']) or '# NONE'
-            )
+            ))
 
     if args.list_operations:
-        print 'Total operations to invoke: {}'.format(ops_count)
+        print('Total operations to invoke: {}'.format(ops_count))
     else:
         LOGGER.debug('Total operations to invoke: %d.', ops_count)
         aws_inventory.invoker.ApiInvoker(args, service_descriptors, ops_count).start()
+
 
 if __name__ == '__main__':
     main(parse_args())

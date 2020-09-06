@@ -2,14 +2,15 @@
 
 import collections
 import threading
-import Tkinter as tk
-import tkMessageBox
-import ttk
+import tkinter as tk
+import tkinter.messagebox as messagebox
+import tkinter.ttk as ttk
 
 
 class LifetimeError(Exception):
     """Progress was interrupted (i.e., window closed or cancel button was pressed)."""
     pass
+
 
 class GuiProgressBar(ttk.Frame):
     def __init__(self, title, work_count, work_func, *func_args):
@@ -46,8 +47,7 @@ class GuiProgressBar(ttk.Frame):
         label = ttk.Label(label_frame, anchor='w', textvariable=label_text)
         label.pack(fill='x')
 
-
-        #XXX: add small fraction to max so progress bar doesn't wrap when work finishes
+        # XXX: add small fraction to max so progress bar doesn't wrap when work finishes
         progress_bar = ttk.Progressbar(
             self,
             orient='horizontal',
@@ -71,12 +71,12 @@ class GuiProgressBar(ttk.Frame):
                             status_label)
 
     def _confirm_quit(self):
-        if tkMessageBox.askyesno(message='Quit?'):
+        if messagebox.askyesno(message='Quit?'):
             self.pending_stop = True
             self.master.destroy()
 
     def _confirm_cancel(self):
-        if tkMessageBox.askyesno(message='Cancel?'):
+        if messagebox.askyesno(message='Cancel?'):
             self.pending_stop = True
             self.widget_space.button_text.set('Canceled')
             self.widget_space.button.state(['disabled'])

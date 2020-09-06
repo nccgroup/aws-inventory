@@ -3,15 +3,17 @@ Ignore certain operations. There are a few reasons to ignore them. Some don't ac
 account resources. Others may be too verbose or not relevant for some users of this tool.
 """
 
-import ConfigParser
+from configparser import ConfigParser
 import logging
 
 
 LOGGER = logging.getLogger(__name__)
 
+
 class BlacklistError(Exception):
     """Generic error for parsing the operations blacklist."""
     pass
+
 
 class OpBlacklistParser(object):
     """Parser for operations blacklist."""
@@ -19,9 +21,9 @@ class OpBlacklistParser(object):
     def __init__(self, blacklist_fp, api_model):
         self.blacklist_fp = blacklist_fp
         self.api_model = api_model
-        self._cfg_parser = ConfigParser.RawConfigParser(allow_no_value=True)
+        self._cfg_parser = ConfigParser(allow_no_value=True)
         self._cfg_parser.optionxform = str  # case sensitive
-        self._cfg_parser.readfp(self.blacklist_fp)
+        self._cfg_parser.read_file(self.blacklist_fp)
 
         # validate blacklist configuration #
 
