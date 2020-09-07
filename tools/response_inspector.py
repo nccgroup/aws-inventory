@@ -7,6 +7,7 @@ import sys
 JSON_FILE = sys.argv[1]
 MAX_NUM_CHILDREN = int(sys.argv[2])
 
+
 def parse_data(py_obj):
     def parse_children(obj, path):
         if len(path) > 4:
@@ -15,9 +16,9 @@ def parse_data(py_obj):
         elif len(path) == 4:
             # interested in API responses
             try:
-                size = len(obj) if not isinstance(obj, basestring) else 0
+                size = len(obj) if not isinstance(obj, str) else 0
                 if size > MAX_NUM_CHILDREN:
-                    print '.'.join(path)
+                    print('.'.join(path))
             except TypeError:
                 pass
             return
@@ -30,5 +31,6 @@ def parse_data(py_obj):
                 parse_children(val, path + [str(val)])
 
     parse_children(py_obj, [])
+
 
 parse_data(json.load(open(JSON_FILE, 'r')))

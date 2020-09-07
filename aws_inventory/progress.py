@@ -5,11 +5,34 @@ import threading
 import tkinter as tk
 import tkinter.messagebox as messagebox
 import tkinter.ttk as ttk
+import tqdm
 
 
 class LifetimeError(Exception):
     """Progress was interrupted (i.e., window closed or cancel button was pressed)."""
     pass
+
+
+class TQDMProgressBar:
+    def __init__(self, title, work_count, work_func, *func_args):
+        self.work_count = work_count
+        self.worker_task = threading.Thread(target=work_func, args=func_args)
+        self.bar = tqdm.tqdm(total=work_count)
+
+    def __del__(self):
+        self.bar.close()
+
+    def mainloop(self):
+        self.worker_task.start()
+
+    def update_progress(self, delta):
+        self.bar.update(delta)
+
+    def update_svc_text(self, svc_name, region):
+        pass
+
+    def finish_work(self):
+        pass
 
 
 class GuiProgressBar(ttk.Frame):

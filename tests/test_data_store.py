@@ -1,6 +1,6 @@
 import os
 import unittest
-from StringIO import StringIO
+from io import StringIO
 
 import aws_inventory.invoker
 
@@ -34,6 +34,7 @@ for i in range(3, 103):
 
 TEST_EXCEPTION_STORE = {'test-service': {'test-operation1': {'test-region': 'exception'}}}
 
+
 class TestDataStore(unittest.TestCase):
     def test_data_file_generation(self):
         responses_dump_fp = StringIO()
@@ -58,6 +59,7 @@ class TestDataStore(unittest.TestCase):
         invoker.store._response_store = TEST_RESPONSE_STORE
         invoker.store._exception_store = TEST_EXCEPTION_STORE
         invoker.write_results(responses_dump_fp, exceptions_dump_fp, gui_data_fp)
+
 
 if __name__ == '__main__':
     unittest.main()

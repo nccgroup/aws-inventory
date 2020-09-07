@@ -56,6 +56,11 @@ def parse_args(args=None):
                         nargs='+',
                         help='Name of regions to include, defaults to all')
 
+    parser.add_argument('--display',
+                        choices=['cmd', 'gui'],
+                        default='cmd',
+                        help='The type of display to use (command-line or GUI)')
+
     parser.add_argument('--list-svcs',
                         action='store_true',
                         help=('Print a list of available services (ignore service and region '
@@ -73,11 +78,8 @@ def parse_args(args=None):
                         ))
 
     parser.add_argument('--op-blacklist',
-                        type=argparse.FileType('r'),
-                        default='operation_blacklist.conf',
                         help=(
-                            'Configuration file listing service operations to avoid invoking ' +
-                            '(default: %(default)s)'
+                            'Configuration file listing service operations to avoid invoking '
                         ))
 
     parser.add_argument('--exceptions-dump', help='File to dump the exceptions store')
@@ -301,7 +303,12 @@ def main(args):
         raise EnvironmentError('List of AWS services to be analyzed is empty.')
     LOGGER.debug('%d AWS service(s) to inspect: %s.', len(services), ', '.join(services))
 
-    op_blacklist_parser = aws_inventory.blacklist.OpBlacklistParser(args.op_blacklist, api_model)
+    if args.op_blacklist is not None:
+        blacklist_fd = open(args.op_blacklist)
+    else:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        blacklist_fd = open(os.path.join(current_dir, 'operation_blacklist.conf'))
+    op_blacklist_parser = aws_inventory.blacklist.OpBlacklistParser(blacklist_fd, api_model)
     service_descriptors = filter_operations(api_model, op_blacklist_parser, args.regions, services)
     if not service_descriptors:
         raise EnvironmentError('No operations to invoke for specifed AWS services and regions.')
@@ -322,7 +329,7 @@ def main(args):
         print('Total operations to invoke: {}'.format(ops_count))
     else:
         LOGGER.debug('Total operations to invoke: %d.', ops_count)
-        aws_inventory.invoker.ApiInvoker(args, service_descriptors, ops_count).start()
+        aws_inventory.invoker.ApiInvoker(args, service_descriptors, ops_count, args.display).start()
 
 
 if __name__ == '__main__':

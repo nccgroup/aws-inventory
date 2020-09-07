@@ -17,15 +17,17 @@ import aws_inventory.store as store
 
 LOGGER = logging.getLogger(__name__)
 
+
 class ApiInvoker(object):
     """Invoke APIs from GUI."""
 
-    def __init__(self, script_args, svc_descriptors, ops_count):
+    def __init__(self, script_args, svc_descriptors, ops_count, display_type):
         self.script_args = script_args
         self.svc_descriptors = svc_descriptors
         self.ops_count = ops_count
         self.progress_bar = None
         self.store = store.ResultStore(script_args.profile)
+        self.display_type = display_type
 
         # search for AWS credentials
         # using opinel allows us to use MFA and a CSV file. Otherwise, we could just use
@@ -41,10 +43,20 @@ class ApiInvoker(object):
 
     def start(self):
         """Start the invoker with associated GUI. Wait for GUI to stop."""
-        self.progress_bar = progress.GuiProgressBar(
-            'AWS Inventory',
-            self.ops_count,
-            self._probe_services)
+        if self.display_type == 'cmd':
+            self.progress_bar = progress.TQDMProgressBar(
+                'AWS Inventory',
+                self.ops_count,
+                self._probe_services
+            )
+        elif self.display_type == 'gui':
+            self.progress_bar = progress.GuiProgressBar(
+                'AWS Inventory',
+                self.ops_count,
+                self._probe_services)
+        else:
+            raise ValueError('Incorrect setting for self.display_type')
+
         self.progress_bar.mainloop()
 
     def _probe_services(self):
