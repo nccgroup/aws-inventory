@@ -56,6 +56,11 @@ def parse_args(args=None):
                         nargs='+',
                         help='Name of regions to include, defaults to all')
 
+    parser.add_argument('--partition',
+                        choices=['aws', 'aws-us-gov', 'aws-cn'],
+                        default='aws',
+                        help='The paritition to obtain data from (I.E. AWS, AWS GovCloud, or AWS China).')
+
     parser.add_argument('--display',
                         choices=['cmd', 'gui'],
                         default='cmd',
@@ -198,9 +203,10 @@ def filter_operations(api_model, op_blacklist_parser, regions, services):
     return svc_descriptors
 
 
-def build_api_model():
+def build_api_model(partition='aws'):
     """Build a model of the available API.
 
+    :param: str describing the parition to operate in
     :rtype: dict
     :return: dict describing operations from a service and available regions
     """
@@ -212,7 +218,7 @@ def build_api_model():
     svc_descriptors = {}
     for svc_name in available_services:
         # validate regions
-        available_regions = frozenset(boto_session.get_available_regions(svc_name))
+        available_regions = frozenset(boto_session.get_available_regions(svc_name, partition))
         svc_descriptors[svc_name] = {'regions': available_regions}
 
         if available_regions:
@@ -256,7 +262,7 @@ def main(args):
         print(aws_inventory.__version__)
         return
 
-    api_model = build_api_model()
+    api_model = build_api_model(args.partition)
 
     if args.list_svcs:
         print('\n'.join(sorted(filter_services(api_model))))
