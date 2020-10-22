@@ -19,7 +19,7 @@ GUI_DATA_FILENAME_TEMPLATE = string.Template(os.path.join(os.getcwd(), 'gui', 'a
 RESPONSE_DATA_FILENAME_TEMPLATE = string.Template(
     os.path.join(
         os.getcwd(),
-        'data',
+        '../data',
         'aws_inventory_data-$profile.json'
     )
 )

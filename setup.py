@@ -24,8 +24,7 @@ setup(
     scripts=[],
     include_package_data=True,
     packages=find_packages(),
-    package_data={},  # TODO: adjust for gui/blacklist_conf, etc.
-    python_requires='>=3.5,<4',  # assume Python 4 is not compat
+    python_requires='>=3.5,<4',  # assume Python 4 is not compatible
     install_requires=install_requires,
     entry_points={
         'console_scripts': [

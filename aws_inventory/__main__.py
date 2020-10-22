@@ -24,6 +24,7 @@ def setup_logging(verbose):
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
+        prog='aws_inventory',
         description='Discover resources in an AWS account.'
     )
 
@@ -255,7 +256,9 @@ def build_api_model(partition='aws'):
     return svc_descriptors
 
 
-def main(args):
+def main():
+    args = parse_args()
+
     setup_logging(args.debug)
 
     if args.version:
@@ -313,11 +316,11 @@ def main(args):
         blacklist_fd = open(args.op_blacklist)
     else:
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        blacklist_fd = open(os.path.join(current_dir, 'operation_blacklist.conf'))
+        blacklist_fd = open(os.path.join(current_dir, '..', 'data', 'operation_blacklist.conf'))
     op_blacklist_parser = aws_inventory.blacklist.OpBlacklistParser(blacklist_fd, api_model)
     service_descriptors = filter_operations(api_model, op_blacklist_parser, args.regions, services)
     if not service_descriptors:
-        raise EnvironmentError('No operations to invoke for specifed AWS services and regions.')
+        raise EnvironmentError('No operations to invoke for specified AWS services and regions.')
 
     ops_count = 0
     for svc_name in service_descriptors:
@@ -339,4 +342,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    main(parse_args())
+    main()
