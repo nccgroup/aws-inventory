@@ -25,3 +25,6 @@ CLIENT_READ_TIMEOUT = 10
 # region to use when service model says there are no regions, but creating a client still
 # requires one
 DEFAULT_REGION = 'us-west-2'
+
+## maximum number of connections to keep in a connection pool
+CLIENT_MAX_POOL_CONNECTIONS = 25
