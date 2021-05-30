@@ -40,7 +40,7 @@ Use your OS package manager:
 
 You can run the Python script without any parameters. It will search for your AWS credentials in your shell environment, instance metadata, config file, then credentials file. You can also provide a CSV file containing your credentials on the commandline. You will want a user that has permissions like the AWS managed policy *ViewOnlyAccess*. If you are feeling lucky, you could just pipe the output of the tool to a JSON parser like *jq*.
 
-The tool could take a long time (dozens of minutes) to complete if no restrictions are placed on which operations to invoke for each service across each region. Filtering by service and region can be done on the commandline while filtering by service operation can be done via configuration file. A [pre-configured file](https://github.com/nccgroup/aws-inventory/blob/master/operation_blacklist.conf) was created and checked into the source code repository. It will be used by default. 
+The tool could take a long time (dozens of minutes) to complete if no restrictions are placed on which operations to invoke for each service across each region. Filtering by service and region can be done on the commandline while filtering by service operation can be done via configuration file. A [pre-configured file](https://github.com/nccgroup/aws-inventory/blob/master/operation_blacklist.conf) was created and checked into the source code repository. It will be used by default.
 
 Aside from the commandline output, you can view the results locally in the webapp. No web server needed. Just open the [HTML file](https://github.com/nccgroup/aws-inventory/blob/master/gui/dist/index.html) in a browser and select the generated JSON file.
 

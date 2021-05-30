@@ -12,7 +12,7 @@ export default class AwsIHomeArea extends Component {
           <h3>commandline: <small>{this.props.commandLine}</small></h3>
           <h3>version: <small>{this.props.version}</small></h3>
           <h3>botocore version: <small>{this.props.botocoreVersion}</small></h3>
-        </Jumbotron>        
+        </Jumbotron>
       </div>
     );
   }

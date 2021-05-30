@@ -1,4 +1,5 @@
 # Introduction
+>> This fork based on cool script from [Nccgroup](https://www.nccgroup.com/) guys, i'm only migrate script from python 2 to python 3
 
 This is a tool that tries to discover all [AWS resources](https://docs.aws.amazon.com/general/latest/gr/glos-chap.html#resource) created in an account. AWS has many products (a.k.a. services) with new ones constantly being added and existing ones expanded with new features. The ecosystem allows users to piece together many different services to form a customized cloud experience. The ability to instantly spin up services at scale comes with a manageability cost. It can quickly become difficult to audit an AWS account for the resources being used. It is not only important for billing purposes, but also for security. Dormant resources and unknown resources are more prone to security configuration weaknesses. Additionally, resources with unexpected dependencies pose availability, access control, and authorization issues.
 
@@ -10,7 +11,13 @@ It uses [botocore](https://github.com/boto/botocore) to discover [AWS services](
 
 # Installation
 
-First, install Python2.7.
+First, you should have python 3.8 with tk support
+I use [pyenv](https://github.com/pyenv/pyenv) for switching between multiple versions of Python.
+
+```shell
+PYTHON_CONFIGURE_OPTS="--with-tcltk-includes='-I/usr/local/opt/tcl-tk/include' --with-tcltk-libs='-L/usr/local/opt/tcl-tk/lib -ltcl8.6 -ltk8.6' --enable-shared --enable-framework" pyenv install 3.8.6
+
+```
 
 There is a small GUI for displaying progress which uses the standard Python *Tkinter* module. However, the underlying native library code for Tcl/Tk may need extra steps to install. Then,
 
@@ -32,9 +39,9 @@ Use your OS package manager:
 
 You can run the script without any parameters. It will search for your AWS creds in your shell environment, instance metadata, config file, then credentials file. You can also provide a CSV file, containing your creds, on the commandline. You will want a user that has permissions like the AWS managed policy [ViewOnlyAccess](arn:aws:iam::aws:policy/job-function/ViewOnlyAccess). If you are feeling lucky, you could just pipe the output of the tool to a JSON parser like *jq*.
 
-The tool could take a long time (dozens of minutes) to complete if no restrictions are placed on which operations to invoke for each service across each region. Filtering by service and region can be done on the commandline while filtering by service operation can be done via configuration file. A [pre-configured file](operation_blacklist.conf) was created and checked into the repository. It will be used by default. 
+The tool could take a long time (dozens of minutes) to complete if no restrictions are placed on which operations to invoke for each service across each region. Filtering by service and region can be done on the commandline while filtering by service operation can be done via configuration file. A [pre-configured file](operation_blacklist.conf) was created and checked into the repository. It will be used by default.
 
-Aside from the commandline output, you can view the results locally in a [React](https://reactjs.org/) [single-page app](https://en.wikipedia.org/wiki/Single-page_application). No web server needed. Just open the [HTML file](gui/dist/index.html) in a browser and select the generated JSON file when prompted.  
+Aside from the commandline output, you can view the results locally in a [React](https://reactjs.org/) [single-page app](https://en.wikipedia.org/wiki/Single-page_application). No web server needed. Just open the [HTML file](gui/dist/index.html) in a browser and select the generated JSON file when prompted.
 
 The app uses [jsTree](https://www.jstree.com/) to display the data in a hierarchical, tree-like structure. There is also a search feature.
 
@@ -101,9 +108,13 @@ Total operations to invoke: 4045
 `$ python aws_inventory.py --debug --dry-run`
 
 # Screenshots
-
+## Ubuntu
 ![invoking apis on commandline](screenshots/invoking%20apis%20on%20commandline.png)
 
 
 
 ![data in browser](screenshots/data%20in%20browser.png)
+
+## MacOS
+
+![macos_inventory_gui](screenshots/macos_inventory.png)

@@ -1,0 +1,39 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+    - id: check-yaml
+      args: [--allow-multiple-documents]
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+    - id: check-docstring-first
+    - id: check-merge-conflict
+    - id: mixed-line-ending
+      args: [--fix=lf]
+  - repo: https://github.com/ambv/black
+    rev: stable
+    hooks:
+    - id: black
+
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-bandit
+    rev: v1.0.4
+    hooks:
+    - id: python-bandit-vulnerability-check
+      args: [--ini, .bandit,-ll,-s, B301, --recursive, .]
+      files: .py$
+
+  - repo: local
+    hooks:
+    - id: flake8
+      name: flake8
+      stages: [commit]
+      language: system
+      entry: flake8
+      types: [python]
+      exclude: |
+        (?x)(
+            ^migration/|
+            ^tst/|
+            ^app/tests/|
+            ^bin/
+        )

@@ -1,0 +1,29 @@
+[flake8]
+jobs = auto
+verbose = 1
+quiet = 0
+tee = True
+exclude =
+    # git folder
+    .git,
+    # python cache
+    __pycache__,
+    test,
+    eggs,
+    migrations,
+    app/tests,
+    bin,
+filename =
+    *.py
+
+disable-noqa = False
+
+max-line-length = 140
+max-complexity = 10
+ignore =
+    F401
+    C901
+    W504
+    W503
+    F403
+    F405

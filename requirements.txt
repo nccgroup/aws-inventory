@@ -1,2 +1,2 @@
-botocore
+botocore==1.20.84
 opinel
