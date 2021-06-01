@@ -20,7 +20,7 @@ export default class AwsIInventoryArea extends Component {
   handleSearch = (evt) => {
     this.setState({searchString: evt.target.value});
   }
-  
+
   handleSelect = (key, evt) => {
     switch (key) {
       case 'showExtraNodes':

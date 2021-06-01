@@ -3,15 +3,18 @@ Ignore certain operations. There are a few reasons to ignore them. Some don't ac
 account resources. Others may be too verbose or not relevant for some users of this tool.
 """
 
-import ConfigParser
+import configparser
 import logging
 
 
 LOGGER = logging.getLogger(__name__)
 
+
 class BlacklistError(Exception):
     """Generic error for parsing the operations blacklist."""
+
     pass
+
 
 class OpBlacklistParser(object):
     """Parser for operations blacklist."""
@@ -19,7 +22,7 @@ class OpBlacklistParser(object):
     def __init__(self, blacklist_fp, api_model):
         self.blacklist_fp = blacklist_fp
         self.api_model = api_model
-        self._cfg_parser = ConfigParser.RawConfigParser(allow_no_value=True)
+        self._cfg_parser = configparser.RawConfigParser(allow_no_value=True)
         self._cfg_parser.optionxform = str  # case sensitive
         self._cfg_parser.readfp(self.blacklist_fp)
 
@@ -28,16 +31,20 @@ class OpBlacklistParser(object):
         err = False
         for svc_name in self._cfg_parser.sections():
             try:
-                available_ops = set(api_model[svc_name]['ops'])
+                available_ops = set(api_model[svc_name]["ops"])
                 blacklist_ops = set(self._cfg_parser.options(svc_name))
                 invalid_ops = blacklist_ops - available_ops
                 if invalid_ops:
                     err = True
-                    LOGGER.error('[%s] Invalid operation(s): %s.', svc_name, ', '.join(invalid_ops))
+                    LOGGER.error(
+                        "[%s] Invalid operation(s): %s.",
+                        svc_name,
+                        ", ".join(invalid_ops),
+                    )
             except KeyError:
                 LOGGER.warning('Invalid service name "%s".', svc_name)
         if err:
-            raise BlacklistError('Failure to validate blacklist file.')
+            raise BlacklistError("Failure to validate blacklist file.")
 
     def is_blacklisted(self, svc_name, op_name):
         """

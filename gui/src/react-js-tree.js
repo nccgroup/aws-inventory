@@ -38,11 +38,11 @@ export default class ReactJsTree extends Component {
     else {
       inst.clear_search();
     }
-    
+
     if (this.props.preferences.showExtraNodes !== nextProps.preferences.showExtraNodes) {
       this.toggle_metadata_viz(inst);
     }
-    
+
     // never let React update the DOM node for jstree instance
     return false;
   }
@@ -73,13 +73,13 @@ export default class ReactJsTree extends Component {
         }
     }
   }
-  
+
   renderJsTree(treeConf) {
     this.$el.on('open_node.jstree', this.handleOpenNode).on('ready.jstree', (evt, data) => {
       this.setState({ready: true});
     }).jstree(treeConf);
   }
-    
+
   toggle_metadata_viz(inst) {
     if (this.hidden_node_ids.length > 0) {
         this.hidden_node_ids.forEach(function(node_id, index, array) {
@@ -90,8 +90,8 @@ export default class ReactJsTree extends Component {
     else {
         this.hidden_node_ids = inst.show_all();
     }
-  } 
-  
+  }
+
   render() {
     return (
       <div ref={el => this.el = el}></div>

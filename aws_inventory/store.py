@@ -11,11 +11,12 @@ import uuid
 
 import botocore
 
-import config
-import version
+from . import config
+from . import version
 
 
 LOGGER = logging.getLogger(__name__)
+
 
 class ResponseEncoder(json.JSONEncoder):
     """Encode responses from operations in order to serialize to JSON."""
@@ -25,6 +26,7 @@ class ResponseEncoder(json.JSONEncoder):
             return o.isoformat()
         return super(ResponseEncoder, self).default(o)
 
+
 class ResultStore(object):
     """Storage and serialization for responses and exceptions."""
 
@@ -32,8 +34,8 @@ class ResultStore(object):
         self.profile = profile
         self._response_store = {}  # {svc: {region: {svc_op: response}}}
         self._exception_store = {}  # {svc: {svc_op: {region: exception}}}
-        self.run_date = time.strftime('%Y-%m-%d %H:%M:%S %Z')
-        self.commandline = ' '.join(sys.argv)
+        self.run_date = time.strftime("%Y-%m-%d %H:%M:%S %Z")
+        self.commandline = " ".join(sys.argv)
         self.version = version.__version__
 
     def add_response(self, service, region, svc_op, resp):
@@ -79,7 +81,7 @@ class ResultStore(object):
         :rtype: str
         :return: serialized response store in JSON format
         """
-        LOGGER.debug('Building the response store.')
+        LOGGER.debug("Building the response store.")
         return json.dumps(self._response_store, cls=ResponseEncoder)
 
     def dump_response_store(self, fp):
@@ -104,7 +106,7 @@ class ResultStore(object):
         :param file fp: file to write to
         """
         # format of data file for jsTree
-        #[
+        # [
         #  {
         #    "text" : "Root node",
         #    "children" : [
@@ -112,76 +114,85 @@ class ResultStore(object):
         #      { "text" : "Child node 2" }
         #    ]
         #  }
-        #]
+        # ]
         def build_children(obj):
             children = []
             if isinstance(obj, dict):
-                for key, val in obj.items():
+                for key, val in list(obj.items()):
                     child = build_children(val)
                     if isinstance(child, (dict, list, tuple)) and child:
-                        children.append({'text': key, 'children': child})
+                        children.append({"text": key, "children": child})
                     else:
                         # leaf node
                         try:
-                            children.append({'text': u'{} = {}'.format(key, val)})
+                            children.append({"text": "{} = {}".format(key, val)})
                         except UnicodeDecodeError:
                             # key or value is probably binary. For example, CloudTrail API ListPublicKeys
-                            children.append({'text': u'{} = {!r}'.format(key, val)})
+                            children.append({"text": "{} = {!r}".format(key, val)})
             elif isinstance(obj, (list, tuple)):
                 for i, val in enumerate(obj):
                     child = build_children(val)
                     if isinstance(child, (dict, list, tuple)) and child:
-                        children.append({'text': '[{:d}]'.format(i), 'children': child})
+                        children.append({"text": "[{:d}]".format(i), "children": child})
                     else:
                         # leaf node
-                        children.append({'text': child})
+                        children.append({"text": child})
             else:
                 return obj
             return children
-        LOGGER.debug('Building the GUI data model.')
-        data = build_children({'[inventory]': self._response_store})
+
+        LOGGER.debug("Building the GUI data model.")
+        data = build_children({"[inventory]": self._response_store})
 
         # assign types to nodes so jsTree can handle them appropriately
 
-        data[0]['type'] = 'root'
-        data[0]['state'] = {'opened': True}
-        for service in data[0]['children']:
-            service['type'] = 'service'
-            service['state'] = {'opened': True}
-            for region in service['children']:
-                region['type'] = 'region'
-                region['state'] = {'opened': True}
+        data[0]["type"] = "root"
+        data[0]["state"] = {"opened": True}
+        for service in data[0]["children"]:
+            service["type"] = "service"
+            service["state"] = {"opened": True}
+            for region in service["children"]:
+                region["type"] = "region"
+                region["state"] = {"opened": True}
                 num_hidden_operations = 0
-                for operation in region['children']:
-                    operation['type'] = 'operation'
+                for operation in region["children"]:
+                    operation["type"] = "operation"
 
                     # add count of non empty response to operation name
 
                     try:
                         num_non_empty_responses = 0
-                        for response in operation['children']:
+                        for response in operation["children"]:
                             try:
-                                if response['text'] == 'ResponseMetadata':
-                                    response['type'] = 'response_metadata'
+                                if response["text"] == "ResponseMetadata":
+                                    response["type"] = "response_metadata"
                                     continue  # ignore metadata nodes in count
-                                num_non_empty_responses += 1 if response['children'] else 0
+                                num_non_empty_responses += (
+                                    1 if response["children"] else 0
+                                )
                             except KeyError:
                                 # an empty response
                                 pass
                         if num_non_empty_responses:
-                            operation['text'] += ' ({:d})'.format(num_non_empty_responses)
+                            operation["text"] += " ({:d})".format(
+                                num_non_empty_responses
+                            )
                         else:
                             num_hidden_operations += 1
-                            operation['state'] = {"hidden": True}
+                            operation["state"] = {"hidden": True}
                     except KeyError:
                         # no response
                         pass
-                region['a_attr'] = {'title': '{:d} hidden operations'.format(num_hidden_operations)}
+                region["a_attr"] = {
+                    "title": "{:d} hidden operations".format(num_hidden_operations)
+                }
 
-        out_obj = {'run_date': self.run_date,
-                   'commandline': self.commandline,
-                   'version': self.version,
-                   'botocore_version': botocore.__version__,
-                   'responses': data}
+        out_obj = {
+            "run_date": self.run_date,
+            "commandline": self.commandline,
+            "version": self.version,
+            "botocore_version": botocore.__version__,
+            "responses": data,
+        }
         LOGGER.debug('Writing the GUI data model to file "%s".', fp.name)
         json.dump(out_obj, fp, cls=ResponseEncoder)
