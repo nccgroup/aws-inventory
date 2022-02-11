@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "private": true,
   "dependencies": {
-    "ajv": "^6.5.3",
+    "ajv": "^6.12.3",
     "bootstrap": "^3.3.7",
     "enzyme": "^3.4.4",
     "jstree": "^3.3.5",
